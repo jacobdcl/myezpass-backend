@@ -23,12 +23,19 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Import routes
+const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
-const resultRoutes = require('./api/results');
+const resultRoutes = require('./routes/results');
 
 // Use routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/results', resultRoutes);
+
+// Simple test route
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to MyEZPass API' });
+});
 
 // Global error handler
 app.use((err, req, res, next) => {
