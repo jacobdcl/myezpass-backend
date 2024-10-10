@@ -14,10 +14,10 @@ router.post('/', auth, async (req, res) => {
 
     const result = await newResult.save();
     console.log('Saved result:', result);
-    res.json(result);
+    res.status(201).json(result);
   } catch (err) {
     console.error('Error saving result:', err);
-    res.status(500).json({ message: 'Error saving result' });
+    res.status(500).json({ message: 'Error saving result', error: err.message });
   }
 });
 
@@ -26,11 +26,11 @@ router.get('/', auth, async (req, res) => {
   try {
     console.log('Fetching results for user:', req.user.id);
     const results = await Result.find({ user: req.user.id }).sort({ date: -1 });
-    console.log('Fetched results:', results);
+    console.log('Fetched results:', results.length);
     res.json(results);
   } catch (err) {
     console.error('Error fetching results:', err);
-    res.status(500).json({ message: 'Error fetching results' });
+    res.status(500).json({ message: 'Error fetching results', error: err.message });
   }
 });
 
@@ -48,11 +48,11 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(401).json({ message: 'User not authorized' });
     }
 
-    await result.remove();
+    await Result.findByIdAndDelete(req.params.id);
     res.json({ message: 'Result removed' });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Server Error');
+    console.error('Error deleting result:', err);
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 });
 

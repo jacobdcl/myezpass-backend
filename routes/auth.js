@@ -1,31 +1,50 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 router.post('/signup', async (req, res) => {
   try {
-    const user = new User(req.body);
+    const { username, password } = req.body;
+    
+    // Check if user already exists
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const user = new User({ username, password });
     await user.save();
-    res.status(201).send({ message: 'User created successfully' });
+
+    // Create and return JWT token
+    const token = jwt.sign({ user: { id: user.id } }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.status(201).json({ message: 'User created successfully', token });
   } catch (error) {
-    res.status(400).send(error);
+    console.error('Signup error:', error);
+    res.status(500).json({ message: 'Error during signup', error: error.message });
   }
 });
 
 router.post('/login', async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.body.username });
+    const { username, password } = req.body;
+    
+    const user = await User.findOne({ username });
     if (!user) {
-      return res.status(400).send({ message: 'User not found' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
-    const isPasswordMatch = await bcrypt.compare(req.body.password, user.password);
+
+    const isPasswordMatch = await user.comparePassword(password);
     if (!isPasswordMatch) {
-      return res.status(400).send({ message: 'Invalid password' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
-    res.send({ message: 'Logged in successfully' });
+
+    // Create and return JWT token
+    const token = jwt.sign({ user: { id: user.id } }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ message: 'Logged in successfully', token });
   } catch (error) {
-    res.status(400).send(error);
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Error during login', error: error.message });
   }
 });
 
