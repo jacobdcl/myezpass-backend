@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const analyzeRoute = require('./routes/analyzeRoute');
 
 dotenv.config();
 
@@ -32,6 +33,9 @@ const resultRoutes = require('./routes/results');
 // Use routes
 app.use('/api/users', userRoutes);
 app.use('/api/results', resultRoutes);
+
+// Use the analyze route
+app.use('/api', analyzeRoute);
 
 // Simple test route
 app.get('/', (req, res) => {
