@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -20,7 +19,7 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign({ user: { id: user.id } }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.status(201).json({ token });
   } catch (err) {
-    console.error('Registration error:', err); // Log the full error
+    console.error('Registration error:', err);
     res.status(500).json({ message: 'Server error during registration' });
   }
 });
@@ -35,7 +34,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }

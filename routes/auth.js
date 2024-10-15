@@ -26,25 +26,24 @@ router.post('/signup', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
   try {
-    const { username, password } = req.body;
-    
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const isPasswordMatch = await user.comparePassword(password);
-    if (!isPasswordMatch) {
+    const isMatch = user.comparePassword(password);
+    if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Create and return JWT token
     const token = jwt.sign({ user: { id: user.id } }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ message: 'Logged in successfully', token });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Error during login', error: error.message });
+    res.json({ token });
+  } catch (err) {
+    console.error('Login error:', err.message);
+    res.status(500).json({ message: 'Server error during login' });
   }
 });
 
@@ -63,7 +62,7 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign({ user: { id: user.id } }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.status(201).json({ token });
   } catch (err) {
-    console.error('Registration error:', err); // Log the full error
+    console.error('Registration error:', err);
     res.status(500).json({ message: 'Server error during registration' });
   }
 });

@@ -1,38 +1,31 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
-  username: { 
-    type: String, 
-    required: true, 
-    unique: true,
-    trim: true,
-    lowercase: true
-  },
-  password: { 
-    type: String, 
+  username: {
+    type: String,
     required: true,
-    minlength: 6
+    unique: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+  password: {
+    type: String,
+    required: true
+  },
+  salt: String
 });
 
-userSchema.pre('save', async function(next) {
-  if (this.isModified('password')) {
-    try {
-      this.password = await bcrypt.hash(this.password, 10);
-    } catch (error) {
-      return next(error);
-    }
-  }
+// Hash password before saving
+userSchema.pre('save', function(next) {
+  if (!this.isModified('password')) return next();
+  this.salt = crypto.randomBytes(16).toString('hex');
+  this.password = crypto.pbkdf2Sync(this.password, this.salt, 1000, 64, 'sha512').toString('hex');
   next();
 });
 
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+// Compare password method
+userSchema.methods.comparePassword = function(candidatePassword) {
+  const hash = crypto.pbkdf2Sync(candidatePassword, this.salt, 1000, 64, 'sha512').toString('hex');
+  return this.password === hash;
 };
 
 module.exports = mongoose.model('User', userSchema);
