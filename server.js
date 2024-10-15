@@ -12,7 +12,7 @@ app.use(cors({
   origin: ['https://www.ezpny.vercel.app', ], // Add your frontend URL here
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true 
+  credentials: true // Allow credentials
 }));
 
 app.use(express.json());

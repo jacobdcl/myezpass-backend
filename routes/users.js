@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 
 // Register a new user
 router.post('/register', async (req, res) => {
@@ -44,6 +45,17 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err.message);
     res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// Get all users (protected route)
+router.get('/', auth, async (req, res) => {
+  try {
+    const users = await User.find().select('-password -salt');
+    res.json(users);
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
