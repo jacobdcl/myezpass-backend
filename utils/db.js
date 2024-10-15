@@ -11,6 +11,12 @@ async function connectToDatabase() {
     return cached.conn;
   }
 
+  if (!cached.promise) {
+    const opts = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    };
+
     cached.promise = mongoose.connect(process.env.MONGODB_URI, opts)
       .then((mongoose) => {
         return mongoose;

@@ -9,7 +9,7 @@ const app = express();
 
 // Enable CORS for all routes
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://ezpny.vercel.app'], // Add your frontend URL here
+  origin: ['https://www.ezpny.vercel.app', 'http://localhost:5173', ], // Add your frontend URL here
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
