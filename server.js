@@ -26,12 +26,10 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Import routes
-const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const resultRoutes = require('./routes/results');
 
 // Use routes
-app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/results', resultRoutes);
 
